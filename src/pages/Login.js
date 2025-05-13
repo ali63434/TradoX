@@ -5,6 +5,7 @@ import styled, { keyframes } from "styled-components";
 import logo from '../assets/logo.jpg';
 import { signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 // Animated gradient background
 const gradientAnimation = keyframes`
@@ -354,6 +355,7 @@ const SuccessMessage = styled.div`
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -367,7 +369,6 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setError('');
       setLoading(true);
@@ -375,8 +376,9 @@ const LoginPage = () => {
       navigate('/');
     } catch (error) {
       setError('Failed to sign in. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
@@ -410,135 +412,128 @@ const LoginPage = () => {
   };
 
   return (
-    <PageContainer>
-      <LoginContainer>
-        <LogoSection>
-          <LogoGlow src={logo} alt="TradoX Logo" />
-          <Title>Welcome to TradoX</Title>
-          <Subtitle>
-            Haven't registered yet?{" "}
-            <StyledLink to="/register">Sign up</StyledLink>
-          </Subtitle>
-        </LogoSection>
+    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gray-900 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-bold text-white">
+            Welcome to TradoX
+          </h2>
+          <p className="mt-2 text-sm text-gray-400">
+            Sign in to your account
+          </p>
+        </div>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-500 text-white p-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
 
-        <Form onSubmit={handleSubmit}>
-          <FormGroup>
-            <Label htmlFor="email">Email address</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              disabled={loading}
-            />
-          </FormGroup>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Email address"
+                />
+              </div>
+            </div>
 
-          <FormGroup>
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              disabled={loading}
-            />
-          </FormGroup>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-700 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Password"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-gray-400 hover:text-gray-300 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash className="h-5 w-5" />
+                    ) : (
+                      <FaEye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <FormOptions>
-            <CheckboxContainer>
-              <Checkbox
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
                 type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                disabled={loading}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-700 rounded bg-gray-800"
               />
-              <CheckboxLabel htmlFor="remember">Remember me</CheckboxLabel>
-            </CheckboxContainer>
-            <ForgotPassword as="button" onClick={() => setShowResetModal(true)}>
-              Forgot password?
-            </ForgotPassword>
-          </FormOptions>
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
+                Remember me
+              </label>
+            </div>
 
-          <LoginButton type="submit" disabled={loading}>
-            {loading ? "Signing in..." : "Login"}
-          </LoginButton>
+            <div className="text-sm">
+              <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300">
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
 
-          <Divider>
-            <DividerText>Or log in with</DividerText>
-          </Divider>
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+              ) : (
+                'Sign in'
+              )}
+            </button>
+          </div>
 
-          <GoogleButton
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-          >
-            <GoogleIcon>
-              <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" fill="currentColor"/>
-              </svg>
-            </GoogleIcon>
-            {loading ? "Signing in..." : "Sign in with Google"}
-          </GoogleButton>
-        </Form>
-
-        <Footer>
-          <FooterLinks>
-            <FooterLink href="#">Contact Us</FooterLink>
-            <FooterLink href="#">Anti-Money Laundering & KYC Policy</FooterLink>
-            <FooterLink href="#">Payment Policy</FooterLink>
-            <FooterLink href="#">Terms & Conditions</FooterLink>
-            <FooterLink href="#">Privacy Policy</FooterLink>
-            <FooterLink href="#">Risk Disclosure</FooterLink>
-          </FooterLinks>
-          <FooterInfo>
-            <Age21Plus>21+</Age21Plus>
-            <Copyright>©2024 TradoX. All rights reserved.</Copyright>
-          </FooterInfo>
-        </Footer>
-      </LoginContainer>
-
-      {showResetModal && (
-        <ModalOverlay onClick={() => setShowResetModal(false)}>
-          <ModalContent onClick={e => e.stopPropagation()}>
-            <CloseButton onClick={() => setShowResetModal(false)}>&times;</CloseButton>
-            <Title>Reset Password</Title>
-            {resetSuccess ? (
-              <SuccessMessage>
-                Password reset email sent. Please check your inbox.
-              </SuccessMessage>
-            ) : (
-              <>
-                {resetError && <ErrorMessage>{resetError}</ErrorMessage>}
-                <Form onSubmit={handlePasswordReset}>
-                  <FormGroup>
-                    <Label htmlFor="resetEmail">Email address</Label>
-                    <Input
-                      id="resetEmail"
-                      type="email"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      required
-                      disabled={resetLoading}
-                    />
-                  </FormGroup>
-                  <LoginButton type="submit" disabled={resetLoading}>
-                    {resetLoading ? "Sending..." : "Send Reset Link"}
-                  </LoginButton>
-                </Form>
-              </>
-            )}
-          </ModalContent>
-        </ModalOverlay>
-      )}
-    </PageContainer>
+          <div className="text-center">
+            <p className="text-sm text-gray-400">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-blue-400 hover:text-blue-300">
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

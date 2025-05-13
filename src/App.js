@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
-import { FaUserCircle, FaChartLine, FaWallet, FaHistory, FaCog, FaHome, FaSignOutAlt } from 'react-icons/fa';
+import { FaUserCircle, FaChartLine, FaWallet, FaHistory, FaCog, FaHome, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
 import Home from './pages/Home';
 import Trading from './pages/Trading';
 import Wallet from './pages/Wallet';
@@ -13,6 +13,7 @@ import { NotificationProvider } from './context/NotificationContext';
 
 function AppContent() {
   const { currentUser, logout, loading } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -25,7 +26,7 @@ function AppContent() {
   // Show loading spinner while checking auth state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen w-full flex items-center justify-center bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -34,20 +35,41 @@ function AppContent() {
   // If not authenticated, show auth routes
   if (!currentUser) {
     return (
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <div className="min-h-screen w-full bg-gray-900">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
     );
   }
 
   // If authenticated, show main app layout
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-gray-900 text-white">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-gray-800">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-white p-2"
+        >
+          {isSidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
+        <div className="flex items-center gap-2">
+          <FaUserCircle className="text-2xl text-blue-400" />
+          <span className="text-sm font-medium">{currentUser.email}</span>
+        </div>
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 p-6 flex flex-col">
-        <div className="flex items-center gap-3 mb-8">
+      <aside className={`
+        fixed md:static inset-y-0 left-0 z-50
+        w-64 bg-gray-800 p-6 flex flex-col
+        transform transition-transform duration-200 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <div className="hidden md:flex items-center gap-3 mb-8">
           <FaUserCircle className="text-3xl text-blue-400" />
           <div>
             <span className="text-lg font-semibold">Aloush</span>
@@ -55,11 +77,11 @@ function AppContent() {
           </div>
         </div>
         <nav className="flex flex-col gap-4">
-          <SidebarLink to="/" icon={<FaHome />} label="Home" />
-          <SidebarLink to="/trading" icon={<FaChartLine />} label="Trading" />
-          <SidebarLink to="/wallet" icon={<FaWallet />} label="Wallet" />
-          <SidebarLink to="/history" icon={<FaHistory />} label="History" />
-          <SidebarLink to="/settings" icon={<FaCog />} label="Settings" />
+          <SidebarLink to="/" icon={<FaHome />} label="Home" onClick={() => setIsSidebarOpen(false)} />
+          <SidebarLink to="/trading" icon={<FaChartLine />} label="Trading" onClick={() => setIsSidebarOpen(false)} />
+          <SidebarLink to="/wallet" icon={<FaWallet />} label="Wallet" onClick={() => setIsSidebarOpen(false)} />
+          <SidebarLink to="/history" icon={<FaHistory />} label="History" onClick={() => setIsSidebarOpen(false)} />
+          <SidebarLink to="/settings" icon={<FaCog />} label="Settings" onClick={() => setIsSidebarOpen(false)} />
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded transition text-red-400"
@@ -70,8 +92,16 @@ function AppContent() {
         </nav>
       </aside>
 
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-6 overflow-y-auto">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/trading" element={<Trading />} />
@@ -85,9 +115,13 @@ function AppContent() {
   );
 }
 
-function SidebarLink({ to, icon, label }) {
+function SidebarLink({ to, icon, label, onClick }) {
   return (
-    <Link to={to} className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded transition">
+    <Link
+      to={to}
+      onClick={onClick}
+      className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded transition"
+    >
       <span className="text-xl">{icon}</span>
       <span className="text-base">{label}</span>
     </Link>
