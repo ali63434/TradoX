@@ -1,11 +1,14 @@
 /* eslint-disable no-script-url */
-import { useEffect } from 'react';
-import Chart from 'chart.js';
+import { useEffect, useRef } from 'react';
+import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import CustomDropdown from "../components/CustomDropdown";
 import adminIcon from "../assets/svg/adminIcon.svg";
 
+// Register Chart.js components
+Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 export default function ChartBar() {
+    const chartRef = useRef(null);
     const buttonContent = (
         <div>
             <svg width="13" height="8" viewBox="0 0 13 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -21,6 +24,10 @@ export default function ChartBar() {
       ];
 
     useEffect(() => {
+        if (chartRef.current) {
+            chartRef.current.destroy();
+        }
+
         let config = {
             type: 'bar',
             data: {
@@ -112,7 +119,15 @@ export default function ChartBar() {
             },
         };
         let ctx = document.getElementById('bar-chart').getContext('2d');
-        window.myBar = new Chart(ctx, config);
+        chartRef.current = new Chart(ctx, config);
+
+        // Cleanup function to destroy chart instance
+        return () => {
+            if (chartRef.current) {
+                chartRef.current.destroy();
+                chartRef.current = null;
+            }
+        };
     }, []);
     return (
         <div className='py-[35px] px-[43px]'>
