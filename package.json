@@ -2,6 +2,7 @@
   "name": "crypto-dashboard",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.2.0",

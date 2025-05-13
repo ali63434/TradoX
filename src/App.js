@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { FaUserCircle, FaChartLine, FaWallet, FaHistory, FaCog, FaHome, FaSignOutAlt } from 'react-icons/fa';
 import Home from './pages/Home';
 import Trading from './pages/Trading';
